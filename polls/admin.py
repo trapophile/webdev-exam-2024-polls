@@ -1,7 +1,8 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-# Register your models here.
 from .models import Profile, Category, Question, Answer
+from import_export.admin import ExportActionModelAdmin
+from .export import QuestionResource
 
 
 @admin.register(Profile)
@@ -27,9 +28,9 @@ class CategoryAdmin(SimpleHistoryAdmin):
 
 @admin.register(Question)
 
-class QuestionAdmin(SimpleHistoryAdmin):
+class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     list_filter = ['category']
     date_hierarchy = 'pub_date'
     list_display = ["user", "question_text", "category", "pub_date"]
     list_display_links = ['question_text']
-
+    resource_class = QuestionResource

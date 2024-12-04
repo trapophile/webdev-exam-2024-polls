@@ -1,10 +1,13 @@
-
+from django.db.models import Q, Count
 from rest_framework import viewsets, generics
 from .models import Question, Answer, Category, Profile
 from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, ProfileSerializer
 from rest_framework.filters import SearchFilter
 from .filters import QuestionFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
@@ -12,6 +15,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['question_text', 'category__title']
     filterset_class = QuestionFilter
+
 
 class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
@@ -23,9 +27,22 @@ class AnswerViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = ['user', 'answer_text', 'question']
 
-class AnswerDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Answer.objects.all()
-    serializer_class = AnswerSerializer
+    @action(methods=['POST', 'GET'], detail=True)
+    def mark_as_usefull(self, request, pk=None):
+        try:
+            answer = self.get_object()
+        except Answer.DoesNotExist:
+            return Response({"error": "Ответ не найден"}, status=404) 
+        answer.usefull = True
+        answer.save()
+
+        return Response({"message": f"Ответ '{answer.answer_text}' помечен полезным."})
+    
+    @action(methods=['GET'], detail=False)
+    def usefull_answers(self, request):
+        usefull_answers = self.queryset.filter(usefull=True)
+        serializer = self.get_serializer(usefull_answers, many=True)
+        return Response(serializer.data)
 
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()

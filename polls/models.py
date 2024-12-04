@@ -48,6 +48,7 @@ class Answer(models.Model):
     answer_text = models.TextField(verbose_name='Текст')
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
     pub_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
+    usefull = models.BooleanField(default=False)
     
     def __str__(self):
         return self.answer_text

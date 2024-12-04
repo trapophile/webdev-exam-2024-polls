@@ -1,6 +1,6 @@
 
 from django.urls import path, include
-from .views import QuestionViewSet, QuestionDetail, AnswerViewSet, AnswerDetail, CategoryViewSet, CategoryDetail, ProfileViewSet, ProfileDetail
+from .views import QuestionViewSet, QuestionDetail, AnswerViewSet, CategoryViewSet, CategoryDetail, ProfileViewSet, ProfileDetail
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -12,7 +12,6 @@ router.register(r'categories', CategoryViewSet)
 
 urlpatterns = [
     path('questions/<int:pk>/', QuestionDetail.as_view(), name='question-detail'),
-    path('answers/<int:pk>/', AnswerDetail.as_view(), name='answer-detail'),
     path('categories/<int:pk>/', CategoryDetail.as_view(), name='category-detail'),
     path('profiles/<int:pk>/', ProfileDetail.as_view(), name='profile-detail'),
     path('', include(router.urls)),

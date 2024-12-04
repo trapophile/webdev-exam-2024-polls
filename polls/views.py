@@ -1,12 +1,12 @@
 
-from rest_framework import generics
+from rest_framework import viewsets, generics
 from .models import Question, Answer, Category, Profile
 from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, ProfileSerializer
 from rest_framework.filters import SearchFilter
 from .filters import QuestionFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-class QuestionListCreate(generics.ListCreateAPIView):
+class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
@@ -17,7 +17,7 @@ class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
 
-class AnswerListCreate(generics.ListCreateAPIView):
+class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
     filter_backends = [SearchFilter]
@@ -27,7 +27,7 @@ class AnswerDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
 
-class ProfileListCreate(generics.ListCreateAPIView):
+class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     filter_backends = [SearchFilter]
@@ -37,7 +37,7 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
-class CategoryListCreate(generics.ListCreateAPIView):
+class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = [SearchFilter]

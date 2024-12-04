@@ -1,14 +1,17 @@
-from django.shortcuts import render
+
 from rest_framework import generics
 from .models import Question, Answer, Category, Profile
 from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, ProfileSerializer
 from rest_framework.filters import SearchFilter
+from .filters import QuestionFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 class QuestionListCreate(generics.ListCreateAPIView):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    filter_backends = [SearchFilter]
-    search_fields = ['category', 'question_text']
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['question_text', 'category__title']
+    filterset_class = QuestionFilter
 
 class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()

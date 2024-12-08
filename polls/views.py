@@ -10,12 +10,18 @@ from rest_framework.response import Response
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
+    queryset = Question.objects.all().order_by('pub_date')
     serializer_class = QuestionSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['question_text', 'category__title']
     filterset_class = QuestionFilter
 
+    @action(methods=['GET'], detail=False)
+    def filter_music_questions(self, request):
+        query = Q(user__in = ['1', '2', '3']) & ~Q(category__lte = 5) | Q(question_text__startswith = 'Почему')
+        usefull_answers = self.queryset.filter(query)
+        serializer = self.get_serializer(usefull_answers, many=True)
+        return Response(serializer.data)
 
 class QuestionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Question.objects.all()
@@ -39,10 +45,18 @@ class AnswerViewSet(viewsets.ModelViewSet):
         return Response({"message": f"Ответ '{answer.answer_text}' помечен полезным."})
     
     @action(methods=['GET'], detail=False)
-    def usefull_answers(self, request):
+    def get_usefull_answers(self, request):
         usefull_answers = self.queryset.filter(usefull=True)
         serializer = self.get_serializer(usefull_answers, many=True)
         return Response(serializer.data)
+    
+    @action(methods=['GET'], detail=False)
+    def filter_usefull_answers(self, request):
+        query = Q(user = '2') & ~Q(usefull = False) | Q(answer_text__startswith = 'сайт')
+        usefull_answers = self.queryset.filter(query)
+        serializer = self.get_serializer(usefull_answers, many=True)
+        return Response(serializer.data)
+    
 
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()

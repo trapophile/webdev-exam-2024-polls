@@ -9,7 +9,6 @@ router.register(r'answers', AnswerViewSet)
 router.register(r'profiles', ProfileViewSet)
 router.register(r'categories', CategoryViewSet)
 
-
 urlpatterns = [
     path('questions/<int:pk>/', QuestionDetail.as_view(), name='question-detail'),
     path('categories/<int:pk>/', CategoryDetail.as_view(), name='category-detail'),

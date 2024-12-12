@@ -1,4 +1,6 @@
 from django.db.models import Q
+from django.core.mail import send_mail
+from django.http import HttpResponse
 from rest_framework import viewsets, generics
 from .models import Question, Answer, Category, Profile
 from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, ProfileSerializer
@@ -7,6 +9,16 @@ from .filters import QuestionFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+def send_test_email(request):
+    send_mail(
+        'Мое тестовое письмо',
+        'Привет, получатель!',
+        'webmaster@localhost',
+        ['recipient@example.com'],
+        fail_silently=False,
+    )
+    return HttpResponse("Письмо отправлено!")
 
 
 class QuestionViewSet(viewsets.ModelViewSet):

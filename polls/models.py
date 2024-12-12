@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib import admin
 from django.utils.html import format_html
-from simple_history.models import HistoricalRecords 
+from simple_history.models import HistoricalRecords
 
-# Create your models here.
+
 class Profile(models.Model):
     nickname = models.CharField(max_length=64, verbose_name='Имя')
     email = models.CharField(max_length=320, verbose_name='Электронная почта')
@@ -13,14 +13,15 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.login
-    
+
     @admin.display(ordering="profile__login")
     def bolded_login(self):
         return format_html('<b>{}</b>', self.login)
-    
+
     class Meta:
         verbose_name_plural = 'Пользователи'
         verbose_name = 'Пользователь'
+
 
 class Category(models.Model):
     title = models.CharField(max_length=64, verbose_name='Название')
@@ -28,10 +29,11 @@ class Category(models.Model):
 
     def __str__(self):
         return self.title
-    
+
     class Meta:
         verbose_name_plural = 'Категории'
         verbose_name = 'Категория'
+
 
 class Question(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
@@ -42,10 +44,11 @@ class Question(models.Model):
 
     def __str__(self):
         return self.question_text
-    
+
     class Meta:
         verbose_name_plural = 'Вопросы'
         verbose_name = 'Вопрос'
+
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='Вопрос')
@@ -54,12 +57,10 @@ class Answer(models.Model):
     pub_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
     usefull = models.BooleanField(default=False, verbose_name='Полезный')
     history = HistoricalRecords()
-    
+
     def __str__(self):
         return self.answer_text
-    
+
     class Meta:
         verbose_name_plural = 'Ответы'
         verbose_name = 'Ответ'
-    
-    

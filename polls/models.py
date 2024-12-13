@@ -56,6 +56,7 @@ class Answer(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
     pub_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
     usefull = models.BooleanField(default=False, verbose_name='Полезный')
+    likes = models.ManyToManyField(Profile, verbose_name='Лайки', related_name='likes_answer', blank=True)
     history = HistoricalRecords()
 
     def __str__(self):

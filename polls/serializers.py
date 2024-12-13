@@ -4,9 +4,10 @@ from .models import Question, Category, Answer, Profile
 
 
 class AnswerSerializer(serializers.ModelSerializer):
+    likes_count = serializers.IntegerField(source='likes.count', read_only=True)
     class Meta:
         model = Answer
-        fields = '__all__'
+        fields = ['question', 'answer_text', 'user', 'pub_date', 'usefull', 'likes_count']
 
     def validate_answer_text(self, text):
         if not text:

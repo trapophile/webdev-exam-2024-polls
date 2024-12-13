@@ -1,5 +1,5 @@
 from import_export.resources import ModelResource
-from .models import Answer
+from .models import Answer, Category
 
 
 class AnswerResource(ModelResource):
@@ -18,3 +18,15 @@ class AnswerResource(ModelResource):
 
     def dehydrate_user(self, obj):
         return str(obj.user)
+    
+
+class CategoryResource(ModelResource):
+    class Meta:
+        model = Category
+        fields = ['title']
+
+    def get_category(self, obj):
+        return f"Категория: {obj.title}"
+
+    def dehydrate_title(self, obj):
+        return self.get_category(obj)

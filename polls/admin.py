@@ -2,13 +2,12 @@ from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from .models import Profile, Category, Question, Answer
 from import_export.admin import ExportActionModelAdmin
-from .export import AnswerResource
+from .export import AnswerResource, CategoryResource
 
 
 @admin.register(Profile)
 class ProfileAdmin(SimpleHistoryAdmin):
     list_display = ["nickname", "email", "bolded_login", "login"]
-    # readonly_fields = ['login']
     search_fields = ['nickname']
 
 
@@ -24,14 +23,18 @@ class AnswerAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
 
 
 @admin.register(Category)
-class CategoryAdmin(SimpleHistoryAdmin):
+class CategoryAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     list_display = ['__str__']
+    resource_class = CategoryResource
 
 
 @admin.register(Question)
-class QuestionAdmin(SimpleHistoryAdmin):
+class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     list_filter = ['category']
     date_hierarchy = 'pub_date'
     list_display = ["user", "question_text", "category", "pub_date"]
     list_display_links = ['question_text']
-    
+
+    def get_export_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.filter(category__id__in = ['1', '2', '3'])

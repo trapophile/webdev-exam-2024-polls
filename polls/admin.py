@@ -11,6 +11,10 @@ class ProfileAdmin(SimpleHistoryAdmin):
     search_fields = ['nickname']
 
 
+class AnswerInLine(admin.TabularInline):
+    model = Answer
+
+
 @admin.register(Answer)
 class AnswerAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     date_hierarchy = "pub_date"
@@ -32,6 +36,7 @@ class CategoryAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
 class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     list_filter = ['category']
     date_hierarchy = 'pub_date'
+    inlines = [AnswerInLine]
     list_display = ["user", "question_text", "category", "pub_date"]
     list_display_links = ['question_text']
 

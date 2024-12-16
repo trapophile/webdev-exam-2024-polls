@@ -11,35 +11,29 @@ from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404
 
 def question_list(request):
-    # Попробуем получить список вопросов из кеша
     questions = cache.get('questions_list')
 
     if not questions:
-        # Если кеш пуст, извлекаем данные из базы данных
         print("Данные извлекаются из базы данных")
         questions = Question.objects.select_related('user', 'category').all()
-        # Сохраняем данные в кеш на 60 секунд
-        cache.set('questions_list', questions, timeout=60)
+        cache.set('questions_list', questions, timeout=60*15)
     else:
         print("Данные получены из кэша")
 
     return render(request, 'question/question_list.html', {'questions': questions})
 
 def question_detail(request, question_id):
-    # Попробуем получить вопрос из кеша
     question_cache_key = f'question_{question_id}'
     question = cache.get(question_cache_key)
 
     if not question:
-        # Если кеш пуст, извлекаем данные из базы данных
         print("Данные извлекаются из базы данных")
         question = get_object_or_404(Question.objects.prefetch_related('answer_set'), id=question_id)
-        # Сохраняем данные в кеш на 60 секунд
-        cache.set(question_cache_key, question, timeout=60)
+        cache.set(question_cache_key, question, timeout=60*15)
     else:
         print("Данные получены из кэша")
 
-    answers = question.answer_set.all()  # Получаем все ответы на вопрос
+    answers = question.answer_set.all()
 
     return render(request, 'question/question_detail.html', {'question': question, 'answers': answers})
 

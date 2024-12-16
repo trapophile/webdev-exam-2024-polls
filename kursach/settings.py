@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
+from celery.schedules import crontab
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,7 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_yasg'
+    'drf_yasg',
+    'django_celery_beat',
+    'django_celery_results',
+    'django_redis',
 ]
 
 REST_FRAMEWORK = {
@@ -92,7 +96,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'gfgf1962',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 
@@ -149,3 +153,36 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = False
 
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+
+CELERY_TASK_SERIALIZER = 'json'
+
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_TASK_MODULES = ['kursach.polls.tasks']
+
+CELERY_BEAT_SCHEDULE = {
+    'send-every-minute': {
+        'task': 'polls.tasks.send_email_every_minute',
+        'schedule': crontab(),  # Каждую минуту
+    },
+    'new_year_announcement': {
+        'task': 'polls.tasks.send_email_new_year',
+        'schedule': crontab(hour=0, minute=0, day_of_month='1', month_of_year='1'),
+    },
+}
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://localhost:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}

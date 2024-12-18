@@ -92,10 +92,10 @@ WSGI_APPLICATION = 'kursach.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+        'HOST': os.getenv('DATABASE_HOST', 'localhost'),
         'NAME': 'polls',
         'USER': 'postgres',
         'PASSWORD': 'gfgf1962',
-        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -144,7 +144,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-EMAIL_HOST = 'localhost'
+EMAIL_HOST = 'mailhog'
 
 EMAIL_PORT = 1025
 
@@ -154,17 +154,24 @@ EMAIL_USE_SSL = False
 
 DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 
-CELERY_BROKER_URL = 'redis://localhost:6379'
-
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-
+REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+REDIS_PORT = os.getenv('REDIS_PORT', 6379)
+REDIS_DB = os.getenv('REDIS_DB', '1')
+REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ['application/json']
-
 CELERY_TASK_SERIALIZER = 'json'
-
 CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
 
-CELERY_TASK_MODULES = ['kursach.polls.tasks']
+# How many messages to prefetch at a time multiplied by the number of concurrent processes.
+# The default is 4 (four messages for each process).
+CELERYD_PREFETCH_MULTIPLIER = 1
+# Maximum number of tasks a pool worker process can execute before it’s replaced with a new one. Default is no limit.
+CELERYD_MAX_TASKS_PER_CHILD = 5
+# Number of CPU cores.
+CELERYD_CONCURRENCY = 2
 
 CELERY_BEAT_SCHEDULE = {
     'send-every-minute': {
@@ -180,7 +187,7 @@ CELERY_BEAT_SCHEDULE = {
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/1',
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }

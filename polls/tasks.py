@@ -7,7 +7,7 @@ def send_email_every_minute():
     send_mail(
         'Письмо раз в минуту',
         'Привет, получатель!',
-        'webmaster@localhost',
+        'semkin379@gmail.com',
         ['recipient@example.com'],
         fail_silently=False,
     )

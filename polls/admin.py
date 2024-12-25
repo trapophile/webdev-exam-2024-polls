@@ -42,4 +42,4 @@ class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
 
     def get_export_queryset(self, request):
         queryset = super().get_queryset(request)
-        return queryset.filter(category__id__in = ['1', '2', '3'])
+        return queryset.filter(category__id__in=['1', '2', '3'])

@@ -10,17 +10,19 @@ from rest_framework.response import Response
 from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404
 
+
 def question_list(request):
     questions = cache.get('questions_list')
 
     if not questions:
         print("Данные извлекаются из базы данных")
         questions = Question.objects.select_related('user', 'category').all()
-        cache.set('questions_list', questions, timeout=60*15)
+        cache.set('questions_list', questions, timeout=60 * 15)
     else:
         print("Данные получены из кэша")
 
     return render(request, 'question/question_list.html', {'questions': questions})
+
 
 def question_detail(request, question_id):
     question_cache_key = f'question_{question_id}'
@@ -29,7 +31,7 @@ def question_detail(request, question_id):
     if not question:
         print("Данные извлекаются из базы данных")
         question = get_object_or_404(Question.objects.prefetch_related('answer_set'), id=question_id)
-        cache.set(question_cache_key, question, timeout=60*15)
+        cache.set(question_cache_key, question, timeout=60 * 15)
     else:
         print("Данные получены из кэша")
 

@@ -2,6 +2,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 from .models import Profile
 
+
 @shared_task
 def send_email_every_minute():
     send_mail(
@@ -11,6 +12,7 @@ def send_email_every_minute():
         ['recipient@example.com'],
         fail_silently=False,
     )
+
 
 @shared_task
 def send_email_new_year():

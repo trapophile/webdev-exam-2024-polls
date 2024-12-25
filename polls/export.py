@@ -18,7 +18,7 @@ class AnswerResource(ModelResource):
 
     def dehydrate_user(self, obj):
         return str(obj.user)
-    
+
 
 class CategoryResource(ModelResource):
     class Meta:

@@ -8,7 +8,7 @@ class AnswerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Answer
-        fields = ['question', 'answer_text', 'user', 'pub_date', 'usefull', 'likes_count']
+        fields = ['id', 'question', 'answer_text', 'user', 'pub_date', 'status', 'likes_count']
 
     def validate_answer_text(self, text):
         if not text:

@@ -2,13 +2,16 @@ from django.db import models
 from django.contrib import admin
 from django.utils.html import format_html
 from simple_history.models import HistoricalRecords
+from django.utils import timezone
+from django.urls import reverse
 
 
 class Profile(models.Model):
     nickname = models.CharField(max_length=64, verbose_name='Имя')
-    email = models.CharField(max_length=320, verbose_name='Электронная почта')
+    email = models.EmailField(verbose_name='Электронная почта')
     login = models.CharField(max_length=256, verbose_name='Логин')
     password = models.CharField(max_length=256, verbose_name='Пароль')
+    image = models.ImageField(verbose_name='Фото', blank=True, upload_to='avatars/')
     history = HistoricalRecords()
 
     def __str__(self):
@@ -24,7 +27,7 @@ class Profile(models.Model):
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=64, verbose_name='Название')
+    title = models.CharField(max_length=64,unique=True, verbose_name='Название')
     history = HistoricalRecords()
 
     def __str__(self):
@@ -36,10 +39,11 @@ class Category(models.Model):
 
 
 class Question(models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='user_questions')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
     question_text = models.TextField(verbose_name='Текст')
-    pub_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
+    pub_date = models.DateTimeField(default=timezone.now, verbose_name='Дата публикации')
+    image = models.ImageField(verbose_name='Фото', blank=True, upload_to='images/')
     history = HistoricalRecords()
 
     def __str__(self):
@@ -48,16 +52,33 @@ class Question(models.Model):
     class Meta:
         verbose_name_plural = 'Вопросы'
         verbose_name = 'Вопрос'
+        ordering = ['-pub_date']
 
+    def get_absolute_url(self):
+        return reverse('question_detail', args=[self.id])
+
+
+class UsefullManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(status=Answer.Status.USEFULL)
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='Вопрос')
+
+    class Status(models.TextChoices):
+        USEFULL = 'US', 'Полезный'
+        NOT_STATED = 'NO', 'Не указан'
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name='Вопрос', related_name='question_answers')
     answer_text = models.TextField(verbose_name='Текст')
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь')
-    pub_date = models.DateTimeField(auto_now=True, verbose_name='Дата публикации')
-    usefull = models.BooleanField(default=False, verbose_name='Полезный')
-    likes = models.ManyToManyField(Profile, verbose_name='Лайки', related_name='likes_answer', blank=True)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='user_answers')
+    pub_date = models.DateTimeField(default=timezone.now, verbose_name='Дата публикации')
+    status = models.CharField(max_length=2, default=Status.NOT_STATED, choices=Status.choices, verbose_name='Статус')
+    likes = models.ManyToManyField(Profile, verbose_name='Лайки', related_name='likes_answers', blank=True)
+    image = models.ImageField(verbose_name='Фото', blank=True, upload_to='images/')
     history = HistoricalRecords()
+
+    objects = models.Manager()
+    usefull = UsefullManager()
 
     def __str__(self):
         return self.answer_text
@@ -65,3 +86,4 @@ class Answer(models.Model):
     class Meta:
         verbose_name_plural = 'Ответы'
         verbose_name = 'Ответ'
+        ordering = ['-pub_date']

@@ -5,10 +5,10 @@ from .models import Answer, Category
 class AnswerResource(ModelResource):
     class Meta:
         model = Answer
-        fields = ['user', 'answer_text', 'id', 'pub_date', 'usefull']
+        fields = ['user', 'answer_text', 'id', 'pub_date', 'status']
 
     def dehydrate_usefull(self, obj):
-        if obj.usefull:
+        if obj.status == 'US':
             return "Полезный ответ"
         else:
             return "Ответ не полезен"

@@ -1,24 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ question.question_text }}</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Список вопросов{% endblock %}
+{% block content %}
+    <p><b>{{ question.user.login }}</b> - ({{ question.pub_date }})</p>
     <h1>{{ question.question_text }}</h1>
-    <p>Автор: {{ question.user.login }}</p>
-    <p>Категория: {{ question.category.title }}</p>
-    <p>Опубликовано: {{ question.pub_date }}</p>
-
     <h2>Ответы:</h2>
-    <ul>
         {% for answer in answers %}
-            <li>{{ answer.answer_text }} - {{ answer.user.login }} ({{ answer.pub_date }})</li>
+            <div><b>{{ answer.user.login }}</b> - ({{ answer.pub_date }})</div>
+            <p>{{ answer.answer_text }}</p>
+            <p>Лайки - {{ answer.likes_count }}</p>
         {% empty %}
-            <li>Нет ответов.</li>
+            <div>Нет ответов.</div>
         {% endfor %}
-    </ul>
-
     <a href="{% url 'question_list' %}">Назад к списку вопросов</a>
-</body>
-</html>
+{% endblock %}

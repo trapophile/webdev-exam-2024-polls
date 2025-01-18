@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Count
 from rest_framework import viewsets, generics
 from .models import Question, Answer, Category, Profile
 from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, ProfileSerializer
@@ -9,18 +9,27 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def question_list(request):
-    questions = cache.get('questions_list')
+    question_list = cache.get('questions_list')
 
-    if not questions:
+    if not question_list:
         print("Данные извлекаются из базы данных")
-        questions = Question.objects.select_related('user', 'category').all()
-        cache.set('questions_list', questions, timeout=60 * 15)
+        question_list = Question.objects.select_related('user', 'category').all()
+        cache.set('questions_list', question_list, timeout=60 * 15)
     else:
         print("Данные получены из кэша")
 
+    paginator = Paginator(question_list, 5)
+    page_number = request.GET.get('page', 1)
+    try:
+        questions = paginator.page(page_number)
+    except PageNotAnInteger:
+        questions = paginator.page(1)
+    except EmptyPage:
+        questions = paginator.page(paginator.num_pages)
     return render(request, 'question/question_list.html', {'questions': questions})
 
 
@@ -30,12 +39,12 @@ def question_detail(request, question_id):
 
     if not question:
         print("Данные извлекаются из базы данных")
-        question = get_object_or_404(Question.objects.prefetch_related('answer_set'), id=question_id)
+        question = get_object_or_404(Question.objects.prefetch_related('question_answers'), id=question_id)
         cache.set(question_cache_key, question, timeout=60 * 15)
     else:
         print("Данные получены из кэша")
 
-    answers = question.answer_set.all()
+    answers = question.question_answers.annotate(likes_count=Count('likes'))
 
     return render(request, 'question/question_detail.html', {'question': question, 'answers': answers})
 
@@ -64,28 +73,25 @@ class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
     filter_backends = [SearchFilter]
-    search_fields = ['user', 'answer_text', 'question']
+    search_fields = ['user', 'answer_text', 'question__question_text']
 
-    @action(methods=['POST', 'GET'], detail=True)
+    @action(methods=['POST' 'GET'], detail=True)
     def mark_as_usefull(self, request, pk=None):
-        try:
-            answer = self.get_object()
-        except Answer.DoesNotExist:
-            return Response({"error": "Ответ не найден"}, status=404)
-        answer.usefull = True
+        answer = get_object_or_404(Answer.objects.filter(id=pk))
+        answer.status = 'US'
         answer.save()
 
-        return Response({"message": f"Ответ '{answer.answer_text}' помечен полезным."})
+        return Response({"message": f"Ответ '{answer.answer_text}' помечен полезным."}, status=200)
 
     @action(methods=['GET'], detail=False)
     def get_usefull_answers(self, request):
-        usefull_answers = self.queryset.filter(usefull=True)
+        usefull_answers = Answer.objects.exclude(status='NO')
         serializer = self.get_serializer(usefull_answers, many=True)
         return Response(serializer.data)
 
     @action(methods=['GET'], detail=False)
     def filter_usefull_answers(self, request):
-        query = Q(user='2') & ~Q(usefull=False) | Q(answer_text__startswith='сайт')
+        query = Q(user='2') & ~Q(status='NO') | Q(answer_text__startswith='сайт')
         usefull_answers = self.queryset.filter(query)
         serializer = self.get_serializer(usefull_answers, many=True)
         return Response(serializer.data)

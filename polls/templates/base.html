@@ -1,19 +1,19 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-    {% extends "base.html" %}
-
-    {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
-
-    {% block branding %}
-    <div id="site-name"><a href="{% url 'admin:index' %}">Polls Administration</a></div>
-    {% endblock %}
-
-    {% block nav-global %}{% endblock %}
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+    <div id="sidebar">
+        <h2>Ответэс</h2>
+        <p>Сайт вопросов и ответов</p>
+    </div>
 </body>
 </html>

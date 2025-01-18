@@ -19,10 +19,10 @@ class AnswerInLine(admin.TabularInline):
 class AnswerAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     date_hierarchy = "pub_date"
     raw_id_fields = ['user']
-    list_display = ['custom_name', 'question__question_text', 'user', 'pub_date']
+    list_display = ['answer_text', 'status', 'question__question_text', 'user', 'pub_date']
+    readonly_fields = ['pub_date']
+    filter_horizontal = ['likes']
 
-    def custom_name(self, obj):
-        return obj.answer_text
     resource_class = AnswerResource
 
 
@@ -39,6 +39,8 @@ class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     inlines = [AnswerInLine]
     list_display = ["user", "question_text", "category", "pub_date"]
     list_display_links = ['question_text']
+    readonly_fields = ['pub_date']
+
 
     def get_export_queryset(self, request):
         queryset = super().get_queryset(request)

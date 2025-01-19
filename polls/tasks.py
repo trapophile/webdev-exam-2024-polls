@@ -1,6 +1,6 @@
 from celery import shared_task
 from django.core.mail import send_mail
-from .models import Profile
+from account.models import User
 
 
 @shared_task
@@ -16,12 +16,12 @@ def send_email_every_minute():
 
 @shared_task
 def send_email_new_year():
-    profiles = Profile.objects.all()
-    for profile in profiles:
+    users = User.objects.all()
+    for user in users:
         send_mail(
             'Новогодняя рассылка',
-            f'С новым годом, с новым счастьем, {profile.nickname}!',
+            f'С новым годом, с новым счастьем, {user.nickname}!',
             'semkin@kursach.com',
-            [profile.email],
+            [user.email],
             fail_silently=False,
         )

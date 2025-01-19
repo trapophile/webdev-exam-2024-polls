@@ -1,7 +1,7 @@
 from django.db.models import Q, Count
 from rest_framework import viewsets, generics
-from .models import Question, Answer, Category, Profile
-from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, ProfileSerializer
+from .models import Question, Answer, Category
+from .serializers import QuestionSerializer, AnswerSerializer, CategorySerializer, UserSerializer
 from rest_framework.filters import SearchFilter
 from .filters import QuestionFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.loader import render_to_string
 import weasyprint
 from django.http import HttpResponse
+from account.models import User
 
 
 def admin_answer_pdf(request, answer_id):
@@ -108,16 +109,16 @@ class AnswerViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ProfileViewSet(viewsets.ModelViewSet):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
     filter_backends = [SearchFilter]
-    search_fields = ['email', 'nickname', 'login']
+    search_fields = ['email', 'username']
 
 
-class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

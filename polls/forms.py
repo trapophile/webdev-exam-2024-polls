@@ -1,8 +1,9 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from .models import Profile, Category, Answer, Question
+from .models import Category, Answer, Question
 from forms import ModelForm
 from django import forms
+from account.models import User
 
 
 class AnswerForm(forms.ModelForm):
@@ -51,32 +52,32 @@ class QuestionForm(ModelForm):
         return question
 
 
-class ProfileForm(UserCreationForm):
+class UserForm(UserCreationForm):
     class Meta:
-        model = Profile
-        fields = ('nickname', 'email', 'password1', 'password2', 'web_url', 'image')
+        model = User
+        fields = ('username', 'email', 'password', 'web_url', 'image')
         widgets = {
-            'nickname': forms.TextInput(attrs={'placeholder': ('Введите имя')}),
+            'username': forms.TextInput(attrs={'placeholder': ('Введите имя')}),
             'email': forms.EmailInput(attrs={'placeholder': ('Введите электронную почту')}),
             'web_url': forms.URLInput(attrs={'placeholder': ('Введите ссылку')}),
         }
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
-        r = Profile.objects.filter(email=email)
+        r = User.objects.filter(email=email)
         if r.count():
             raise ValidationError(('Этот адрес электронной почты уже используется.'))
         return email
 
     def save(self, commit=True):
-        profile = super().save(commit=False)
-        profile.email = self.cleaned_data['email']
-        profile.nickname = self.cleaned_data['nickname']
-        profile.web_url = self.cleaned_data['web_url']
-        profile.image = self.cleaned_data['image']
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.username = self.cleaned_data['username']
+        user.web_url = self.cleaned_data['web_url']
+        user.image = self.cleaned_data['image']
         if commit:
-            profile.save()
-        return profile
+            user.save()
+        return user
 
 
 class CategoryForm(ModelForm):

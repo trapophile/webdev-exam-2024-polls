@@ -1,6 +1,7 @@
 from rest_framework import serializers
 import re
-from .models import Question, Category, Answer, Profile
+from .models import Question, Category, Answer
+from account.models import User
 
 
 class AnswerSerializer(serializers.ModelSerializer):
@@ -18,9 +19,9 @@ class AnswerSerializer(serializers.ModelSerializer):
         return text
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Profile
+        model = User
         fields = '__all__'
 
     def validate_login(self, value):

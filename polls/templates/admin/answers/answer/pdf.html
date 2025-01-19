@@ -10,13 +10,13 @@
     </p>
     <h2>{{ answer.question.question_title }}</h2>
     <p>
-        Пользователь: {{ answer.question.user.nickname }}<br>
+        Пользователь: {{ answer.question.user.username }}<br>
         Категория: {{ answer.question.category.title }}<br>
         Дата публикации: ({{ answer.question.pub_date }})<br>
     </p>
     <h3>{{ answer.answer_text}}</h3>
     <ul>
-        <li>Пользователь: {{ answer.user.nickname }}</li>
+        <li>Пользователь: {{ answer.user.username }}</li>
         <li>Лайки: {{ answer.likes.count }}</li>
         <li>Дата публикации: {{ answer.pub_date }}</li>
         <li>Статус: {% if answer.status == "US" %}Полезный{% else %}Не оценен{% endif %}</li>

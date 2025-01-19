@@ -9,7 +9,7 @@
         <h2>
             <a href="{{ question.get_absolute_url }}">{{ question.question_title|truncatewords:30|capfirst }}</a> 
         </h2>
-        <p>{{ question.user.login }} в категории {{ question.category.title }}</p>
+        <p>{{ question.user.username }} в категории {{ question.category.title }}</p>
     {% endfor %}
     {% include "pagination.html" with page=questions %}
 {% endblock %}

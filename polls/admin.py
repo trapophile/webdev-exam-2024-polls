@@ -1,16 +1,10 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
-from .models import Profile, Category, Question, Answer
+from .models import Category, Question, Answer
 from import_export.admin import ExportActionModelAdmin
 from .export import AnswerResource, CategoryResource
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
-
-@admin.register(Profile)
-class ProfileAdmin(SimpleHistoryAdmin):
-    list_display = ["nickname", "email", "bolded_login", "login", 'web_url']
-    search_fields = ['nickname']
 
 
 class AnswerInLine(admin.TabularInline):

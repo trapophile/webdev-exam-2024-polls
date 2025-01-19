@@ -64,7 +64,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all().order_by('pub_date')
     serializer_class = QuestionSerializer
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ['question_text', 'category__title']
+    search_fields = ['question_title', 'category__title']
     filterset_class = QuestionFilter
 
     @action(methods=['GET'], detail=False)
@@ -84,7 +84,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
     queryset = Answer.objects.all()
     serializer_class = AnswerSerializer
     filter_backends = [SearchFilter]
-    search_fields = ['user', 'answer_text', 'question__question_text']
+    search_fields = ['user', 'answer_text', 'question__question_title']
 
     @action(methods=['POST' 'GET'], detail=True)
     def mark_as_usefull(self, request, pk=None):

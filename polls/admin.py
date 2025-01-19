@@ -18,7 +18,7 @@ class AnswerInLine(admin.TabularInline):
 
 
 def answer_pdf(obj):
-    url = reverse('polls:admin_answer_pdf', args=[obj.id])
+    url = reverse('admin_answer_pdf', args=[obj.id])
     return mark_safe(f'<a href="{url}">PDF</a>')
 answer_pdf.short_description = 'PDF'
 

@@ -10,7 +10,7 @@ class AnswerForm(forms.ModelForm):
         model = Answer
         fields = ('answer_text', 'document', 'image')
         widgets = {
-            'answer_text': forms.Textarea(attrs={'rows': 10, 'cols': 80, 'placeholder': _('Введите ответ')}),
+            'answer_text': forms.Textarea(attrs={'rows': 10, 'cols': 80, 'placeholder': ('Введите ответ')}),
         }
 
     def clean_answer_text(self):

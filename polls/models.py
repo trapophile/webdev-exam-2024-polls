@@ -12,6 +12,7 @@ class Profile(models.Model):
     login = models.CharField(max_length=256, verbose_name='Логин')
     password = models.CharField(max_length=256, verbose_name='Пароль')
     image = models.ImageField(verbose_name='Фото', blank=True, upload_to='avatars/')
+    web_url = models.URLField(verbose_name="Ссылка", blank=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -27,7 +28,7 @@ class Profile(models.Model):
 
 
 class Category(models.Model):
-    title = models.CharField(max_length=64,unique=True, verbose_name='Название')
+    title = models.CharField(max_length=64, unique=True, verbose_name='Название')
     history = HistoricalRecords()
 
     def __str__(self):
@@ -41,14 +42,15 @@ class Category(models.Model):
 class Question(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='user_questions')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
-    question_text = models.TextField(verbose_name='Текст')
+    question_body = models.TextField(verbose_name='Текст', blank=True)
+    question_title = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(default=timezone.now, verbose_name='Дата публикации')
+    document = models.FileField(blank=True, upload_to='documents/', verbose_name='Документ')
     image = models.ImageField(verbose_name='Фото', blank=True, upload_to='images/')
     history = HistoricalRecords()
 
     def __str__(self):
-        return self.question_text
-
+        return self.question_title
     class Meta:
         verbose_name_plural = 'Вопросы'
         verbose_name = 'Вопрос'
@@ -74,6 +76,7 @@ class Answer(models.Model):
     pub_date = models.DateTimeField(default=timezone.now, verbose_name='Дата публикации')
     status = models.CharField(max_length=2, default=Status.NOT_STATED, choices=Status.choices, verbose_name='Статус')
     likes = models.ManyToManyField(Profile, verbose_name='Лайки', related_name='likes_answers', blank=True)
+    document = models.FileField(blank=True, upload_to='documents/', verbose_name='Документ')
     image = models.ImageField(verbose_name='Фото', blank=True, upload_to='images/')
     history = HistoricalRecords()
 

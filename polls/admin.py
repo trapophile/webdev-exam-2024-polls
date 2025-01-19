@@ -9,7 +9,7 @@ from django.utils.safestring import mark_safe
 
 @admin.register(Profile)
 class ProfileAdmin(SimpleHistoryAdmin):
-    list_display = ["nickname", "email", "bolded_login", "login"]
+    list_display = ["nickname", "email", "bolded_login", "login", 'web_url']
     search_fields = ['nickname']
 
 
@@ -27,7 +27,7 @@ answer_pdf.short_description = 'PDF'
 class AnswerAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     date_hierarchy = "pub_date"
     raw_id_fields = ['user']
-    list_display = ['answer_text', 'status', 'question__question_text', 'user', 'pub_date', answer_pdf]
+    list_display = ['answer_text', 'status', 'question__question_title', 'user', 'pub_date', answer_pdf]
     readonly_fields = ['pub_date']
     filter_horizontal = ['likes']
 
@@ -45,8 +45,8 @@ class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
     list_filter = ['category']
     date_hierarchy = 'pub_date'
     inlines = [AnswerInLine]
-    list_display = ["user", "question_text", "category", "pub_date"]
-    list_display_links = ['question_text']
+    list_display = ["user", "question_title", "category", "pub_date"]
+    list_display_links = ['question_title']
     readonly_fields = ['pub_date']
 
 

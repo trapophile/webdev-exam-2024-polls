@@ -6,7 +6,7 @@
     <h1>Список вопросов</h1>
     {% for question in questions %}
         <h2>
-            <a href="{{ question.get_absolute_url }}">{{ question.question_text }}</a> 
+            <a href="{{ question.get_absolute_url }}">{{ question.question_title }}</a> 
         </h2>
         <p>{{ question.user.login }} в категории {{ question.category.title }}</p>
     {% endfor %}

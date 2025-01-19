@@ -3,7 +3,7 @@
 {% block title %}Список вопросов{% endblock %}
 {% block content %}
     <p><b>{{ question.user.login }}</b> - ({{ question.pub_date }})</p>
-    <h1>{{ question.question_text }}</h1>
+    <h1>{{ question.question_title }}</h1>
     <h2>Ответы:</h2>
         {% for answer in answers %}
             <div><b>{{ answer.user.login }}</b> - ({{ answer.pub_date }})</div>

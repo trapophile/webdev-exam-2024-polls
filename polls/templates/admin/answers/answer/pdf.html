@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Ответэс</h1>
+    <p>
+        Ответ номер {{ answer.id }}<br>
+        <span>
+            {{ answer.pub_date|date:"M d, Y" }}
+        </span>
+    </p>
+    <h2>{{ answer.question.question_text }}</h2>
+    <p>
+        Пользователь: {{ answer.question.user.nickname }}<br>
+        Категория: {{ answer.question.category.title }}<br>
+        Дата публикации: ({{ answer.question.pub_date }})<br>
+    </p>
+    <h3>{{ answer.answer_text}}</h3>
+    <ul>
+        <li>Пользователь: {{ answer.user.nickname }}</li>
+        <li>Лайки: {{ answer.likes.count }}</li>
+        <li>Дата публикации: {{ answer.pub_date }}</li>
+        <li>Статус: {% if answer.status == "US" %}Полезный{% else %}Не оценен{% endif %}</li>
+    </ul>    
+</body>
+</html>

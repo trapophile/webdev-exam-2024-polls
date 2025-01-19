@@ -1,6 +1,6 @@
 
 from django.urls import path, include
-from .views import QuestionViewSet, QuestionDetail, AnswerViewSet, CategoryViewSet, CategoryDetail, ProfileViewSet, ProfileDetail, AnswerDetail, question_list, question_detail
+from .views import QuestionViewSet, QuestionDetail, AnswerViewSet, CategoryViewSet, CategoryDetail, ProfileViewSet, ProfileDetail, AnswerDetail, question_list, question_detail, admin_answer_pdf
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -17,4 +17,5 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('', question_list, name='question_list'),
     path('question/<int:question_id>/', question_detail, name='question_detail'),
+    path('admin/answer/<int:answer_id>/pdf/', admin_answer_pdf, name='admin_answer_pdf'),
 ]

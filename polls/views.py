@@ -10,7 +10,18 @@ from rest_framework.response import Response
 from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.template.loader import render_to_string
+import weasyprint
+from django.http import HttpResponse
 
+
+def admin_answer_pdf(request, answer_id):
+    answer = get_object_or_404(Answer, id=answer_id)
+    html = render_to_string('admin/answers/answer/pdf.html', {'answer': answer})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename=answer_{answer.id}.pdf'
+    weasyprint.HTML(string=html).write_pdf(response)
+    return response
 
 def question_list(request):
     question_list = cache.get('questions_list')

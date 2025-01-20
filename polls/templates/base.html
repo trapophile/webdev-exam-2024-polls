@@ -1,19 +1,60 @@
 <!DOCTYPE html>
-{% load static %}
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
+    <title>Ответэс</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div id="content">
-        {% block content %}
-        {% endblock %}
-    </div>
-    <div id="sidebar">
-        <h2>Ответэс</h2>
-        <p>Сайт вопросов и ответов</p>
-    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'polls:home' %}">Ответэс</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'polls:category_list' %}">
+                            <i class="fas fa-tags"></i> Категории
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'polls:question_list' %}">
+                            <i class="fas fa-question-circle"></i> Вопросы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'polls:answer_list' %}">
+                            <i class="fas fa-comments"></i> Ответы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'polls:user_list' %}">
+                            <i class="fas fa-users"></i> Пользователи
+                        </a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <a href="{% url 'polls:question_create' %}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Задать вопрос
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

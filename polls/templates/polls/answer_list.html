@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Ответы</h1>
+    <div class="list-group">
+        {% for answer in answers %}
+        <div class="list-group-item">
+            <p class="mb-1">{{ answer.answer_text|truncatewords:50 }}</p>
+            <small class="text-muted">
+                <i class="fas fa-user"></i> {{ answer.user.username }} |
+                <i class="fas fa-question"></i> 
+                <a href="{{ answer.question.get_absolute_url }}" class="text-decoration-none">
+                    {{ answer.question.question_title }}
+                </a> |
+                <i class="fas fa-thumbs-up"></i> {{ answer.like_count }} |
+                <i class="far fa-clock"></i> {{ answer.pub_date|date:"d.m.Y H:i" }}
+            </small>
+            {% if answer.status == 'US' %}
+            <span class="badge bg-success ms-2">Полезный ответ</span>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-muted">Ответов пока нет</p>
+        {% endfor %}
+    </div>
+    
+    {% include 'polls/includes/pagination.html' %}
+</div>
+{% endblock %} 

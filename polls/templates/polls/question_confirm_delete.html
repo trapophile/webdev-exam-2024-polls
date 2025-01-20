@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">Удаление вопроса</h5>
+                </div>
+                <div class="card-body">
+                    <p>Вы уверены, что хотите удалить вопрос "{{ object.question_title }}"?</p>
+                    <p class="text-muted small">Это действие нельзя будет отменить. Все ответы к этому вопросу также будут удалены.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'polls:question_detail' object.id %}" class="btn btn-outline-primary">Отмена</a>
+                            <button type="submit" class="btn btn-danger">Удалить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

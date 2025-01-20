@@ -1,15 +1,20 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import Category, Answer, Question
-from forms import ModelForm
 from django import forms
 from account.models import User
 
 
 class AnswerForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        label='От чьего имени',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Answer
-        fields = ('answer_text', 'document', 'image')
+        fields = ['user', 'answer_text', 'image', 'document']
         widgets = {
             'answer_text': forms.Textarea(attrs={'rows': 10, 'cols': 80, 'placeholder': ('Введите ответ')}),
         }
@@ -20,23 +25,24 @@ class AnswerForm(forms.ModelForm):
             raise ValidationError(('Ответ не может быть пустым.'))
         return text
 
-    def save(self, user, question, commit=True):
-        answer = super().save(commit=False)
-        answer.user = user
-        answer.question = question
+    def save(self, commit=True):
+        instance = super(AnswerForm, self).save(commit=False)
+        instance.user = self.cleaned_data['user']
         if commit:
-            answer.save()
-        return answer
+            instance.save()
+        return instance
 
 
-class QuestionForm(ModelForm):
+class QuestionForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        label='От чьего имени',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Question
-        fields = ('category', 'question_title', 'question_body', 'document', 'image')
-        widgets = {
-            'question_title': forms.Textarea(attrs={'rows': 2, 'cols': 40, 'placeholder': ('Введите заголовок вопроса')}),
-            'question_body': forms.Textarea(attrs={'rows': 10, 'cols': 80, 'placeholder': ('Введите текст вопроса')}),
-        }
+        fields = ['user', 'question_title', 'question_body', 'category', 'image', 'document']
 
     def clean_question_title(self):
         title = self.cleaned_data['question_title']
@@ -44,12 +50,12 @@ class QuestionForm(ModelForm):
             raise ValidationError(('Заголовок вопроса не может быть пустым.'))
         return title
 
-    def save(self, user, commit=True):
-        question = super().save(commit=False)
-        question.user = user
+    def save(self, commit=True):
+        instance = super(QuestionForm, self).save(commit=False)
+        instance.user = self.cleaned_data['user']
         if commit:
-            question.save()
-        return question
+            instance.save()
+        return instance
 
 
 class UserForm(UserCreationForm):
@@ -80,7 +86,7 @@ class UserForm(UserCreationForm):
         return user
 
 
-class CategoryForm(ModelForm):
+class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = '__all__'

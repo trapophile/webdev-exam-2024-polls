@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- Вопрос -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">{{ question.question_title }}</h5>
+            <div class="d-flex align-items-center">
+                <small class="me-3">{{ question.pub_date|date:"d.m.Y H:i" }}</small>
+                <div class="btn-group btn-group-sm">
+                    <a href="{% url 'polls:question_update' question.id %}" class="btn btn-light" title="Редактировать">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'polls:question_delete' question.id %}" class="btn btn-light" title="Удалить">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                {{ question.question_body|linebreaks }}
+            </div>
+            {% if question.image %}
+            <div class="mb-3">
+                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#questionImage">
+                    <i class="fas fa-image"></i> Показать изображение
+                </button>
+                <div class="collapse mt-2" id="questionImage">
+                    <img src="{{ question.image.url }}" class="img-fluid rounded" style="max-width: 300px;" alt="Изображение к вопросу">
+                </div>
+            </div>
+            {% endif %}
+            {% if question.document %}
+            <div class="mb-3">
+                <a href="{{ question.document.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                    <i class="fas fa-file"></i> Скачать прикрепленный файл
+                </a>
+            </div>
+            {% endif %}
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                    <i class="fas fa-user"></i> {{ question.user.username }}
+                </div>
+                <div>
+                    <span class="badge bg-light text-dark border">{{ question.category.title }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ответы -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Ответы ({{ answers|length }})</h4>
+        <a href="{% url 'polls:answer_create' question.id %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Добавить ответ
+        </a>
+    </div>
+
+    {% for answer in answers %}
+    <div class="card mb-3" id="answer-{{ answer.id }}">
+        <div class="card-body">
+            <div class="mb-3">
+                {{ answer.answer_text|linebreaks }}
+            </div>
+            {% if answer.image %}
+            <div class="mb-3">
+                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#answerImage{{ answer.id }}">
+                    <i class="fas fa-image"></i> Показать изображение
+                </button>
+                <div class="collapse mt-2" id="answerImage{{ answer.id }}">
+                    <img src="{{ answer.image.url }}" class="img-fluid rounded" style="max-width: 300px;" alt="Изображение к ответу">
+                </div>
+            </div>
+            {% endif %}
+            {% if answer.document %}
+            <div class="mb-3">
+                <a href="{{ answer.document.url }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                    <i class="fas fa-file"></i> Скачать прикрепленный файл
+                </a>
+            </div>
+            {% endif %}
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    <i class="fas fa-user"></i> {{ answer.user.username }} |
+                    <i class="far fa-clock"></i> {{ answer.pub_date|date:"d.m.Y H:i" }}
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-light border" disabled>
+                        <i class="fas fa-thumbs-up"></i>
+                        {{ answer.likes.count }}
+                    </button>
+                    {% if answer.status == 'US' %}
+                    <a href="{% url 'polls:mark_answer_useful' answer.id %}" 
+                       class="btn btn-success btn-sm ms-1" 
+                       title="Снять отметку полезного ответа">
+                        <i class="fas fa-check-circle"></i> Полезный ответ
+                    </a>
+                    {% else %}
+                    <a href="{% url 'polls:mark_answer_useful' answer.id %}" 
+                       class="btn btn-outline-success btn-sm ms-1" 
+                       title="Отметить как полезный ответ">
+                        <i class="far fa-check-circle"></i> Отметить полезным
+                    </a>
+                    {% endif %}
+                    <div class="btn-group btn-group-sm ms-2">
+                        <a href="{% url 'polls:answer_update' answer.id %}" class="btn btn-light border">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'polls:answer_delete' answer.id %}" class="btn btn-light border">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+        На этот вопрос пока нет ответов. Будьте первым!
+    </div>
+    {% endfor %}
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const likeButtons = document.querySelectorAll('.like-btn');
+    
+    likeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const answerId = this.dataset.answerId;
+            
+            fetch(`/polls/answer/${answerId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                const likesCount = this.querySelector('.likes-count');
+                likesCount.textContent = data.likes_count;
+                
+                if (data.liked) {
+                    this.classList.remove('btn-outline-success');
+                    this.classList.add('btn-success');
+                } else {
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-success');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

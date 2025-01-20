@@ -1,5 +1,5 @@
 from django import template
-from .models import Question
+from ..models import Question
 
 
 register = template.Library()
@@ -16,9 +16,9 @@ def context_tag(context, variable_name):
     else:
         return f"Переменная {variable_name} отсутствует в контексте."
     
-from .models import Question
+from ..models import Question
 
-@register.inclusion_tag('question_list.html')
+@register.inclusion_tag('question/question_list_tag.html')
 def queryset_tag():
     questions = Question.objects.all()[:5]
     return {'questions': questions}

@@ -3,6 +3,8 @@ from django.urls import path, include
 from .views import QuestionViewSet, QuestionDetail, AnswerViewSet, CategoryViewSet, CategoryDetail, UserViewSet, UserDetail, AnswerDetail, question_list, question_detail, admin_answer_pdf
 from rest_framework.routers import DefaultRouter
 
+app_name = 'polls'
+
 router = DefaultRouter()
 router.register(r'questions', QuestionViewSet)
 router.register(r'answers', AnswerViewSet)

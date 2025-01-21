@@ -30,20 +30,21 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'account.User'
 
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'account:dashboard'
 
-LOGIN_URL = 'login'
+LOGIN_URL = 'account:login'
 
-LOGOUT_URL = 'logout'
+LOGOUT_REDIRECT_URL = 'polls:question_list'
 
 # Application definition
 
 INSTALLED_APPS = [
+    'account',
+    'polls',
     'import_export',
     'simple_history',
     'rest_framework',
     'django_filters',
-    'polls',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,7 +56,6 @@ INSTALLED_APPS = [
     'django_celery_results',
     'django_redis',
     'debug_toolbar',
-    'account'
 ]
 
 REST_FRAMEWORK = {

@@ -26,19 +26,37 @@ SECRET_KEY = 'django-insecure-9+7&ieos+h)kem5ujdjl=74r4xljjx1ix+=*h-l((v_%r$--5i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['polls.com', 'localhost', '127.0.0.1']
 
 AUTH_USER_MODEL = 'account.User'
 
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'polls:home'
 
-LOGIN_URL = 'login'
+LOGIN_URL = 'account:login'
 
-LOGOUT_URL = 'logout'
+LOGOUT_REDIRECT_URL = 'polls:home'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '86005432580-prlpda8a5utq4rrncoq7dervtea7u8lj.apps.googleusercontent.com'
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SOCIAL_AUTH_PIPELINE = [
+ 'social_core.pipeline.social_auth.social_details',
+ 'social_core.pipeline.social_auth.social_uid',
+ 'social_core.pipeline.social_auth.auth_allowed',
+ 'social_core.pipeline.social_auth.social_user',
+ 'social_core.pipeline.user.get_username',
+ 'social_core.pipeline.user.create_user',
+ 'account.authentication.create_profile',
+ 'social_core.pipeline.social_auth.associate_user',
+ 'social_core.pipeline.social_auth.load_extra_data',
+ 'social_core.pipeline.user.user_details',
+]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'account',
     'polls',
     'import_export',
     'simple_history',
@@ -55,7 +73,8 @@ INSTALLED_APPS = [
     'django_celery_results',
     'django_redis',
     'debug_toolbar',
-    'account'
+    'social_django',
+    'django_extensions',
 ]
 
 REST_FRAMEWORK = {
@@ -130,7 +149,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.google.GoogleOAuth2',
+]
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

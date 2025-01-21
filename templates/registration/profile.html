@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Профиль пользователя {{ profile_user.username }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Статистика:</h6>
+                            <div class="d-flex gap-3 text-muted">
+                                <div title="Количество вопросов">
+                                    <i class="fas fa-question-circle"></i> {{ profile_user.user_questions.count }}
+                                </div>
+                                <div title="Количество ответов">
+                                    <i class="fas fa-comment"></i> {{ profile_user.user_answers.count }}
+                                </div>
+                                <div>
+                                    <i class="far fa-calendar-alt"></i> На сайте с {{ profile_user.date_joined|date:"d.m.Y" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="mb-3">Последние вопросы:</h6>
+                        {% if questions %}
+                        <ul class="list-group">
+                            {% for question in questions %}
+                            <li class="list-group-item">
+                                <a href="{% url 'polls:question_detail' question.id %}" class="text-decoration-none">
+                                    {{ question.question_title }}
+                                </a>
+                                <small class="text-muted d-block">{{ question.pub_date|date:"d.m.Y H:i" }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-muted">Пользователь еще не задал ни одного вопроса</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="mb-3">Последние ответы:</h6>
+                        {% if answers %}
+                        <ul class="list-group">
+                            {% for answer in answers %}
+                            <li class="list-group-item">
+                                <div class="mb-2">{{ answer.answer_text|truncatechars:100 }}</div>
+                                <a href="{% url 'polls:question_detail' answer.question.id %}" class="text-decoration-none small">
+                                    На вопрос: {{ answer.question.question_title }}
+                                </a>
+                                <small class="text-muted d-block">{{ answer.pub_date|date:"d.m.Y H:i" }}</small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-muted">Пользователь еще не написал ни одного ответа</p>
+                        {% endif %}
+                    </div>
+
+                    {% if user == profile_user %}
+                    <div class="d-flex justify-content-end">
+                        <form action="{% url 'account:logout' %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="fas fa-sign-out-alt"></i> Выйти
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

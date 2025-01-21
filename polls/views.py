@@ -15,10 +15,12 @@ import weasyprint
 from django.http import HttpResponse, JsonResponse
 from account.models import User
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy, reverse
 from .forms import QuestionForm, AnswerForm
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     context = {
@@ -238,77 +240,134 @@ class QuestionDetailView(DetailView):
         ).order_by('-status', '-like_count', '-pub_date')
         return context
 
-class QuestionCreateView(CreateView):
+class QuestionCreateView(LoginRequiredMixin, CreateView):
     model = Question
     form_class = QuestionForm
     template_name = 'polls/question_form.html'
+    success_url = reverse_lazy('polls:question_list')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+class QuestionUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Question
+    form_class = QuestionForm
+    template_name = 'polls/question_form.html'
+    
+    def test_func(self):
+        question = self.get_object()
+        return self.request.user == question.user
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account:login')
+        raise PermissionDenied("У вас нет прав для редактирования этого вопроса")
 
     def get_success_url(self):
         return reverse('polls:question_detail', kwargs={'pk': self.object.pk})
 
-class QuestionUpdateView(UpdateView):
-    model = Question
-    form_class = QuestionForm
-    template_name = 'polls/question_form.html'
-
-    def get_success_url(self):
-        return reverse('polls:question_detail', kwargs={'pk': self.object.pk})
-
-class QuestionDeleteView(DeleteView):
+class QuestionDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Question
     success_url = reverse_lazy('polls:question_list')
+    
+    def test_func(self):
+        question = self.get_object()
+        return self.request.user == question.user
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account:login')
+        raise PermissionDenied("У вас нет прав для удаления этого вопроса")
+
     template_name = 'polls/question_confirm_delete.html'
 
-def answer_create(request, question_id):
-    question = get_object_or_404(Question, id=question_id)
-    if request.method == 'POST':
-        form = AnswerForm(request.POST, request.FILES)
-        if form.is_valid():
-            answer = form.save(commit=False)
-            answer.question = question
-            answer.save()
-            return redirect('polls:question_detail', pk=question.id)
-    else:
-        form = AnswerForm()
-    return render(request, 'polls/answer_form.html', {
-        'form': form,
-        'question': question
-    })
 
-def answer_update(request, pk):
-    answer = get_object_or_404(Answer, id=pk)
-    if request.method == 'POST':
-        form = AnswerForm(request.POST, request.FILES, instance=answer)
-        if form.is_valid():
-            form.save()
-            return redirect('polls:question_detail', pk=answer.question.id)
-    else:
-        form = AnswerForm(instance=answer)
-    return render(request, 'polls/answer_form.html', {
-        'form': form,
-        'answer': answer,
-        'question': answer.question
-    })
+class AnswerUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Answer
+    form_class = AnswerForm
+    template_name = 'polls/answer_form.html'
 
-def answer_delete(request, pk):
-    answer = get_object_or_404(Answer, id=pk)
-    if request.method == 'POST':
-        question_id = answer.question.id
-        answer.delete()
+    def test_func(self):
+        answer = self.get_object()
+        return self.request.user == answer.user
+
+    def get_success_url(self):
+        answer = self.get_object()
+        return reverse('polls:question_detail', kwargs={'pk': answer.question.id})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['question'] = self.get_object().question  # добавляем вопрос в контекст
+        return context
+
+class AnswerDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Answer
+    
+    def test_func(self):
+        answer = self.get_object()
+        return self.request.user == answer.user
+
+    def get_success_url(self):
+        return reverse('polls:question_detail', kwargs={'pk': self.object.question.pk})
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account:login')
+        raise PermissionDenied("У вас нет прав для удаления этого ответа")
+
+@login_required
+def mark_answer_useful(request, answer_id):
+    answer = get_object_or_404(Answer, id=answer_id)
+    question = answer.question
+    question_id = question.id  # явно получаем ID вопроса
+    
+    if request.user != question.user:
+        messages.error(request, 'Только автор вопроса может отмечать ответы как полезные')
         return redirect('polls:question_detail', pk=question_id)
-    return render(request, 'polls/answer_confirm_delete.html', {'answer': answer})
-
-def mark_answer_useful(request, pk):
-    answer = get_object_or_404(Answer, pk=pk)
-    # Сначала сбросим все ответы на этот вопрос в статус 'NU'
-    Answer.objects.filter(question=answer.question).update(status='NU')
     
     if answer.status == 'US':
-        answer.status = 'NU'
-        messages.success(request, 'Отметка о полезности ответа снята')
+        answer.status = 'NO'
+        messages.success(request, 'Отметка о полезном ответе снята')
     else:
+        question.question_answers.filter(status='US').update(status='NO')
         answer.status = 'US'
         messages.success(request, 'Ответ отмечен как полезный')
     
     answer.save()
-    return redirect('polls:question_detail', pk=answer.question.id)
+    return redirect('polls:question_detail', pk=question_id)  # используем сохраненный ID
+
+class AnswerCreateView(LoginRequiredMixin, CreateView):
+    model = Answer
+    form_class = AnswerForm
+    template_name = 'polls/answer_form.html'
+
+    def form_valid(self, form):
+        question = get_object_or_404(Question, pk=self.kwargs['question_id'])
+        form.instance.question = question
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['question'] = get_object_or_404(Question, pk=self.kwargs['question_id'])
+        return context
+
+    def get_success_url(self):
+        return reverse('polls:question_detail', kwargs={'pk': self.kwargs['question_id']})
+
+@login_required
+def like_answer(request, answer_id):
+    answer = get_object_or_404(Answer, id=answer_id)
+    
+    if request.user in answer.likes.all():
+        answer.likes.remove(request.user)
+        liked = False
+    else:
+        answer.likes.add(request.user)
+        liked = True
+    
+    return JsonResponse({
+        'liked': liked,
+        'likes_count': answer.likes.count()
+    })

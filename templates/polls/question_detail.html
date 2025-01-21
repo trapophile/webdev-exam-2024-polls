@@ -8,6 +8,7 @@
             <h5 class="card-title mb-0">{{ question.question_title }}</h5>
             <div class="d-flex align-items-center">
                 <small class="me-3">{{ question.pub_date|date:"d.m.Y H:i" }}</small>
+                {% if user.is_authenticated and question.user == user %}
                 <div class="btn-group btn-group-sm">
                     <a href="{% url 'polls:question_update' question.id %}" class="btn btn-light" title="Редактировать">
                         <i class="fas fa-edit"></i>
@@ -16,6 +17,7 @@
                         <i class="fas fa-trash"></i>
                     </a>
                 </div>
+                {% endif %}
             </div>
         </div>
         <div class="card-body">
@@ -91,19 +93,26 @@
                         <i class="fas fa-thumbs-up"></i>
                         {{ answer.likes.count }}
                     </button>
-                    {% if answer.status == 'US' %}
-                    <a href="{% url 'polls:mark_answer_useful' answer.id %}" 
-                       class="btn btn-success btn-sm ms-1" 
-                       title="Снять отметку полезного ответа">
+                    {% if user.is_authenticated and question.user == user %}
+                        {% if answer.status == 'US' %}
+                        <a href="{% url 'polls:mark_answer_useful' answer.id %}" 
+                           class="btn btn-success btn-sm ms-1" 
+                           title="Снять отметку полезного ответа">
+                            <i class="fas fa-check-circle"></i> Полезный ответ
+                        </a>
+                        {% else %}
+                        <a href="{% url 'polls:mark_answer_useful' answer.id %}" 
+                           class="btn btn-outline-success btn-sm ms-1" 
+                           title="Отметить как полезный ответ">
+                            <i class="far fa-check-circle"></i> Отметить полезным
+                        </a>
+                        {% endif %}
+                    {% elif answer.status == 'US' %}
+                    <span class="badge bg-success ms-1">
                         <i class="fas fa-check-circle"></i> Полезный ответ
-                    </a>
-                    {% else %}
-                    <a href="{% url 'polls:mark_answer_useful' answer.id %}" 
-                       class="btn btn-outline-success btn-sm ms-1" 
-                       title="Отметить как полезный ответ">
-                        <i class="far fa-check-circle"></i> Отметить полезным
-                    </a>
+                    </span>
                     {% endif %}
+                    {% if user.is_authenticated and answer.user == user %}
                     <div class="btn-group btn-group-sm ms-2">
                         <a href="{% url 'polls:answer_update' answer.id %}" class="btn btn-light border">
                             <i class="fas fa-edit"></i>
@@ -112,6 +121,7 @@
                             <i class="fas fa-trash"></i>
                         </a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -123,37 +133,4 @@
     {% endfor %}
 </div>
 
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const likeButtons = document.querySelectorAll('.like-btn');
-    
-    likeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const answerId = this.dataset.answerId;
-            
-            fetch(`/polls/answer/${answerId}/like/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                const likesCount = this.querySelector('.likes-count');
-                likesCount.textContent = data.likes_count;
-                
-                if (data.liked) {
-                    this.classList.remove('btn-outline-success');
-                    this.classList.add('btn-success');
-                } else {
-                    this.classList.remove('btn-success');
-                    this.classList.add('btn-outline-success');
-                }
-            });
-        });
-    });
-});
-</script>
-{% endblock %}
 {% endblock %} 

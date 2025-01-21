@@ -6,15 +6,9 @@ from account.models import User
 
 
 class AnswerForm(forms.ModelForm):
-    user = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        label='От чьего имени',
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
     class Meta:
         model = Answer
-        fields = ['user', 'answer_text', 'image', 'document']
+        fields = ['answer_text', 'image', 'document']
         widgets = {
             'answer_text': forms.Textarea(attrs={'rows': 10, 'cols': 80, 'placeholder': ('Введите ответ')}),
         }
@@ -27,22 +21,15 @@ class AnswerForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(AnswerForm, self).save(commit=False)
-        instance.user = self.cleaned_data['user']
         if commit:
             instance.save()
         return instance
 
 
 class QuestionForm(forms.ModelForm):
-    user = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        label='От чьего имени',
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
     class Meta:
         model = Question
-        fields = ['user', 'question_title', 'question_body', 'category', 'image', 'document']
+        fields = ['question_title', 'question_body', 'category', 'image', 'document']
 
     def clean_question_title(self):
         title = self.cleaned_data['question_title']
@@ -52,7 +39,6 @@ class QuestionForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(QuestionForm, self).save(commit=False)
-        instance.user = self.cleaned_data['user']
         if commit:
             instance.save()
         return instance

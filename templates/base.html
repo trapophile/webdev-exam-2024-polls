@@ -40,11 +40,32 @@
                         </a>
                     </li>
                 </ul>
-                <div class="d-flex">
+                <div class="d-flex me-5">
                     <a href="{% url 'polls:question_create' %}" class="btn btn-success">
                         <i class="fas fa-plus"></i> Задать вопрос
                     </a>
                 </div>
+                {% if user.is_authenticated %}
+                    <div class="nav-item dropdown">
+                        <a class="btn btn-outline-light border-2 dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-outline-primary">
+                            <li><a class="dropdown-item" href="{% url 'account:profile' %}">Личный кабинет</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form action="{% url 'account:logout' %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">Выйти</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'account:login' %}" class="btn btn-outline-light border-2">Войти</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </nav>

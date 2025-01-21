@@ -4,8 +4,8 @@ from .views import (QuestionViewSet, QuestionDetail, AnswerViewSet,
     admin_answer_pdf, home, CategoryListView, 
     QuestionListView, AnswerListView, UserListView, 
     QuestionDetailView, QuestionCreateView, QuestionUpdateView,
-    QuestionDeleteView, answer_create, answer_update, answer_delete,
-    mark_answer_useful) 
+    QuestionDeleteView, AnswerCreateView, mark_answer_useful, AnswerUpdateView, AnswerDeleteView,
+    like_answer) 
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -32,8 +32,8 @@ urlpatterns = [
     path('question/new/', QuestionCreateView.as_view(), name='question_create'),
     path('question/<int:pk>/edit/', QuestionUpdateView.as_view(), name='question_update'),
     path('question/<int:pk>/delete/', QuestionDeleteView.as_view(), name='question_delete'),
-    path('question/<int:question_id>/answer/', answer_create, name='answer_create'),
-    path('answer/<int:pk>/edit/', answer_update, name='answer_update'),
-    path('answer/<int:pk>/delete/', answer_delete, name='answer_delete'),
-    path('answer/<int:pk>/mark-useful/', mark_answer_useful, name='mark_answer_useful'),
+    path('question/<int:question_id>/answer/', AnswerCreateView.as_view(), name='answer_create'),
+    path('answer/<int:answer_id>/mark-useful/', mark_answer_useful, name='mark_answer_useful'),
+    path('answer/<int:pk>/update/', AnswerUpdateView.as_view(), name='answer_update'),
+    path('answer/<int:pk>/delete/', AnswerDeleteView.as_view(), name='answer_delete'),
 ]

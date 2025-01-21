@@ -8,13 +8,22 @@
                 <div class="card-header bg-primary text-white">
                     <h5 class="card-title mb-0">
                         {% if form.instance.pk %}
-                        Редактировать вопрос
+                        Редактировать ответ
                         {% else %}
-                        Задать вопрос
+                        Написать ответ
                         {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
+                    {% if not form.instance.pk %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ question.question_title }}</h6>
+                            <p class="card-text">{{ question.question_body|truncatewords:50 }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
@@ -48,12 +57,12 @@
                         {% endfor %}
 
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'polls:question_list' %}" class="btn btn-outline-primary">Отмена</a>
+                            <a href="{% url 'polls:question_detail' question.id %}" class="btn btn-outline-primary">Отмена</a>
                             <button type="submit" class="btn btn-primary">
                                 {% if form.instance.pk %}
                                 Сохранить изменения
                                 {% else %}
-                                Опубликовать вопрос
+                                Опубликовать ответ
                                 {% endif %}
                             </button>
                         </div>

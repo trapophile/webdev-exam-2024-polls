@@ -35,7 +35,7 @@ class Question(models.Model):
         ordering = ['-pub_date']
 
     def get_absolute_url(self):
-        return reverse('question_detail', args=[self.id])
+        return reverse('polls:question_detail', args=[self.id])
 
 
 class UsefullManager(models.Manager):

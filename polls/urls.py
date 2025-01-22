@@ -4,8 +4,7 @@ from .views import (QuestionViewSet, QuestionDetail, AnswerViewSet,
     admin_answer_pdf, home, CategoryListView, 
     QuestionListView, AnswerListView, UserListView, 
     QuestionDetailView, QuestionCreateView, QuestionUpdateView,
-    QuestionDeleteView, AnswerCreateView, mark_answer_useful, AnswerUpdateView, AnswerDeleteView,
-    like_answer) 
+    QuestionDeleteView, AnswerCreateView, mark_answer_useful, AnswerUpdateView, AnswerDeleteView) 
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()

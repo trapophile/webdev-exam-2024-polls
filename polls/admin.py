@@ -12,15 +12,16 @@ class AnswerInLine(admin.TabularInline):
 
 
 def answer_pdf(obj):
-    url = reverse('admin_answer_pdf', args=[obj.id])
+    url = reverse('polls:admin_answer_pdf', args=[obj.id])
     return mark_safe(f'<a href="{url}">PDF</a>')
 answer_pdf.short_description = 'PDF'
 
 
 @admin.register(Answer)
 class AnswerAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
+    list_filter = ['user', 'question']
     date_hierarchy = "pub_date"
-    raw_id_fields = ['user']
+    raw_id_fields = ['user', 'question']
     list_display = ['answer_text', 'status', 'question__question_title', 'user', 'pub_date', answer_pdf]
     readonly_fields = ['pub_date']
     filter_horizontal = ['likes']
@@ -36,8 +37,9 @@ class CategoryAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(ExportActionModelAdmin, SimpleHistoryAdmin):
-    list_filter = ['category']
+    list_filter = ['category', 'user']
     date_hierarchy = 'pub_date'
+    raw_id_fields = ['user', 'category']
     inlines = [AnswerInLine]
     list_display = ["user", "question_title", "category", "pub_date"]
     list_display_links = ['question_title']

@@ -5,5 +5,5 @@ from simple_history.admin import SimpleHistoryAdmin
 
 @admin.register(User)
 class UserAdmin(SimpleHistoryAdmin):
-    list_display = ["username", "email", "bolded_login", 'web_url']
+    list_display = ["bolded_login", "email", 'web_url']
     search_fields = ['username']

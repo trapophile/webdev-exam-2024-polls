@@ -28,7 +28,9 @@ class Question(models.Model):
     history = HistoricalRecords()
 
     def __str__(self):
-        return self.question_title
+        return f"{self.id}"
+    
+    
     class Meta:
         verbose_name_plural = 'Вопросы'
         verbose_name = 'Вопрос'
@@ -62,7 +64,7 @@ class Answer(models.Model):
     usefull = UsefullManager()
 
     def __str__(self):
-        return self.answer_text
+        return f"{self.id}"
 
     class Meta:
         verbose_name_plural = 'Ответы'

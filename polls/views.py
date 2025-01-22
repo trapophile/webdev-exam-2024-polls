@@ -9,10 +9,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.loader import render_to_string
 import weasyprint
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from account.models import User
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
@@ -23,18 +22,36 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 
 def home(request):
+    popular_categories = cache.get('popular_categories')
+    if not popular_categories:
+        print("Данные извлекаются из базы данных")
+        popular_categories = Category.objects.annotate(question_count=Count('question')).order_by('-question_count')[:5]
+        cache.set('popular_categories', popular_categories, timeout=60 * 15)
+    else:
+        print("Данные получены из кэша")
+
+    unanswered_questions = cache.get('unanswered_questions')
+    if not unanswered_questions:
+        print("Данные извлекаются из базы данных")
+        unanswered_questions = Question.objects.filter(question_answers__isnull=True).distinct()[:5]
+        cache.set('unanswered_questions', unanswered_questions, timeout=60 * 15)
+    else:
+        print("Данные получены из кэша")
+
+    active_users = cache.get('active_users')
+    if not active_users:
+        print("Данные извлекаются из базы данных")
+        active_users = User.objects.annotate(answer_count=Count('user_answers')).order_by('-answer_count')[:5]
+        cache.set('active_users', active_users, timeout=60 * 15)
+    else:
+        print("Данные получены из кэша")
+
     context = {
-        'popular_categories': Category.objects.annotate(
-            question_count=Count('question')
-        ).order_by('-question_count')[:5],
+        'popular_categories': popular_categories,
         
-        'unanswered_questions': Question.objects.filter(
-            question_answers__isnull=True
-        ).distinct()[:5],
+        'unanswered_questions': unanswered_questions,
         
-        'active_users': User.objects.annotate(
-            answer_count=Count('user_answers')
-        ).order_by('-answer_count')[:5]
+        'active_users': active_users,
     }
     return render(request, 'polls/home.html', context)
 
@@ -45,42 +62,6 @@ def admin_answer_pdf(request, answer_id):
     response['Content-Disposition'] = f'filename=answer_{answer.id}.pdf'
     weasyprint.HTML(string=html).write_pdf(response)
     return response
-
-def question_list(request):
-    question_list = cache.get('questions_list')
-
-    if not question_list:
-        print("Данные извлекаются из базы данных")
-        question_list = Question.objects.select_related('user', 'category').all()
-        cache.set('questions_list', question_list, timeout=5)
-    else:
-        print("Данные получены из кэша")
-
-    paginator = Paginator(question_list, 5)
-    page_number = request.GET.get('page', 1)
-    try:
-        questions = paginator.page(page_number)
-    except PageNotAnInteger:
-        questions = paginator.page(1)
-    except EmptyPage:
-        questions = paginator.page(paginator.num_pages)
-    return render(request, 'question/question_list.html', {'questions': questions})
-
-
-def question_detail(request, question_id):
-    question_cache_key = f'question_{question_id}'
-    question = cache.get(question_cache_key)
-
-    if not question:
-        print("Данные извлекаются из базы данных")
-        question = get_object_or_404(Question.objects.prefetch_related('question_answers'), id=question_id)
-        cache.set(question_cache_key, question, timeout=60 * 15)
-    else:
-        print("Данные получены из кэша")
-
-    answers = question.question_answers.annotate(likes_count=Count('likes'))
-
-    return render(request, 'question/question_detail.html', {'question': question, 'answers': answers})
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -109,7 +90,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = ['user', 'answer_text', 'question__question_title']
 
-    @action(methods=['POST' 'GET'], detail=True)
+    @action(methods=['POST', 'GET'], detail=True)
     def mark_as_usefull(self, request, pk=None):
         answer = get_object_or_404(Answer.objects.filter(id=pk))
         answer.status = 'US'
@@ -335,7 +316,7 @@ def mark_answer_useful(request, answer_id):
         messages.success(request, 'Ответ отмечен как полезный')
     
     answer.save()
-    return redirect('polls:question_detail', pk=question_id)  # используем сохраненный ID
+    return redirect('polls:question_detail', pk=question_id)
 
 class AnswerCreateView(LoginRequiredMixin, CreateView):
     model = Answer
@@ -355,19 +336,3 @@ class AnswerCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('polls:question_detail', kwargs={'pk': self.kwargs['question_id']})
-
-@login_required
-def like_answer(request, answer_id):
-    answer = get_object_or_404(Answer, id=answer_id)
-    
-    if request.user in answer.likes.all():
-        answer.likes.remove(request.user)
-        liked = False
-    else:
-        answer.likes.add(request.user)
-        liked = True
-    
-    return JsonResponse({
-        'liked': liked,
-        'likes_count': answer.likes.count()
-    })

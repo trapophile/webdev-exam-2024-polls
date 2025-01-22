@@ -15,7 +15,7 @@ def profile_view(request, pk=None):
         user = get_object_or_404(User, id=pk)
     
     return render(request, 'registration/profile.html', {
-        'profile_user': user,  # используем другое имя, чтобы не конфликтовать с user в шаблоне
+        'profile_user': user,
         'questions': user.user_questions.all()[:5],
         'answers': user.user_answers.all()[:5]
     })
